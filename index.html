@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AltStack — Building Differently</title>
+    <meta name="description" content="AI researcher, model fine-tuner, and tool builder. Building differently.">
+    <meta property="og:title" content="AltStack — Building Differently">
+    <meta property="og:description" content="AI researcher, model fine-tuner, and tool builder.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f8f8;
+            --bg-tertiary: #f0f0f0;
+            --text-primary: #0a0a0a;
+            --text-secondary: #2a2a2a;
+            --text-muted: #5a5a5a;
+            --glass-bg: rgba(255,255,255,0.7);
+            --glass-border: rgba(255,255,255,0.5);
+            --glass-shadow: rgba(0,0,0,0.1);
+            --gold: #d4af37;
+            --gold-light: #e8c547;
+            --border-color: rgba(0,0,0,0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #d0d0d0;
+            --text-muted: #8a8a8a;
+            --glass-bg: rgba(20,20,20,0.75);
+            --glass-border: rgba(255,255,255,0.1);
+            --glass-shadow: rgba(0,0,0,0.3);
+            --border-color: rgba(255,255,255,0.08);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            transition: background 0.4s, color 0.4s;
+            overflow-x: hidden;
+        }
+
+        /* Progress Bar */
+        #progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 3px;
+            width: 0%;
+            background: var(--gold);
+            z-index: 9999;
+            transition: width 0.1s linear;
+        }
+
+        /* Cursor Glow */
+        #cursor-glow {
+            position: fixed;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 70%);
+            pointer-events: none;
+            transform: translate(-50%,-50%);
+            z-index: 0;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px var(--glass-shadow);
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            padding: 16px 32px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            transition: all 0.3s;
+        }
+
+        header.scrolled { top: 10px; padding: 12px 28px; }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .logo span { color: var(--gold); }
+
+        nav { display: flex; gap: 32px; }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 2px;
+            background: var(--gold);
+            transition: width 0.3s;
+        }
+
+        nav a:hover { color: var(--gold); }
+        nav a:hover::after, nav a.active::after { width: 100%; }
+        nav a.active { color: var(--gold); }
+
+        .header-actions { display: flex; align-items: center; gap: 16px; }
+
+        .theme-toggle {
+            width: 44px; height: 24px;
+            background: var(--bg-tertiary);
+            border-radius: 100px;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px;
+            width: 18px; height: 18px;
+            background: var(--gold);
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        [data-theme="dark"] .theme-toggle::before { transform: translateX(20px); }
+
+        .theme-toggle .icon { position: absolute; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; }
+        .sun-icon { left: 5px; opacity: 1; transition: opacity 0.3s; }
+        .moon-icon { right: 5px; opacity: 0.5; transition: opacity 0.3s; }
+        [data-theme="dark"] .sun-icon { opacity: 0.5; }
+        [data-theme="dark"] .moon-icon { opacity: 1; }
+
+        /* Main */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 140px 24px 120px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* TOC */
+        .toc-sidebar {
+            position: fixed;
+            left: 24px; top: 50%;
+            transform: translateY(-50%);
+            padding: 20px;
+            border-radius: 16px;
+            width: 180px;
+        }
+
+        .toc-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .toc-list { list-style: none; }
+        .toc-list li { margin-bottom: 8px; }
+
+        .toc-list a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: block;
+            padding: 4px 0 4px 12px;
+            border-left: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .toc-list a:hover, .toc-list a.active { color: var(--gold); border-left-color: var(--gold); }
+
+        /* Share */
+        .share-btn {
+            position: fixed;
+            right: 24px; top: 50%;
+            transform: translateY(-50%);
+            padding: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 100;
+            border: none;
+            color: var(--text-primary);
+        }
+
+        .share-btn:hover { background: var(--gold) !important; color: #0a0a0a; transform: translateY(-50%) scale(1.1); }
+        .share-btn svg { width: 24px; height: 24px; display: block; }
+
+        /* Hero */
+        #hero {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px 0;
+        }
+
+        .hero-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            width: fit-content;
+        }
+
+        .hero-label .dot {
+            width: 8px; height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 4.2rem);
+            font-weight: 700;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+
+        h1 .highlight { color: var(--gold); }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 540px;
+            margin-bottom: 40px;
+        }
+
+        .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 100px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary { background: var(--gold); color: #0a0a0a; }
+        .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,175,55,0.3); }
+        .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { transform: translateY(-2px); }
+
+        /* Sections */
+        section {
+            padding: 80px 0;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16,1,0.3,1);
+        }
+
+        section.visible { opacity: 1; transform: translateY(0); }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+        }
+
+        h2 .number { color: var(--gold); font-weight: 400; margin-right: 12px; }
+
+        .section-desc { color: var(--text-muted); margin-bottom: 48px; max-width: 500px; }
+
+        /* About */
+        .about-content { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+        .about-text p { margin-bottom: 20px; color: var(--text-secondary); }
+        .about-text p strong { color: var(--text-primary); }
+        .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        .skill-item {
+            padding: 20px;
+            border-radius: 12px;
+            transition: all 0.3s;
+            border: 1px solid var(--border-color);
+        }
+
+        .skill-item:hover { transform: translateY(-4px); border-color: var(--gold); }
+        .skill-item h4 { font-size: 0.85rem; color: var(--gold); margin-bottom: 4px; font-weight: 600; }
+        .skill-item p { font-size: 0.9rem; color: var(--text-muted); }
+
+        /* Projects */
+        .filter-wrap { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+
+        .filter-btn {
+            padding: 7px 18px;
+            border-radius: 100px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover, .filter-btn.active { background: var(--gold); color: #0a0a0a; border-color: var(--gold); }
+
+        .projects-grid { display: flex; flex-direction: column; gap: 24px; }
+
+        .project-card {
+            padding: 32px;
+            border-radius: 20px;
+            transition: all 0.4s;
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .project-card:hover { transform: translateX(8px); border-color: var(--gold); }
+
+        .project-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .project-title { font-size: 1.25rem; font-weight: 600; }
+        .project-year { font-size: 0.85rem; color: var(--text-muted); padding: 4px 12px; background: var(--bg-tertiary); border-radius: 100px; }
+        .project-desc { color: var(--text-secondary); margin-bottom: 20px; }
+        .project-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tag { padding: 6px 14px; background: var(--bg-tertiary); border-radius: 100px; font-size: 0.8rem; color: var(--text-muted); }
+
+        /* Blog */
+        .reading-grid { display: grid; gap: 20px; }
+
+        .article-card {
+            padding: 28px;
+            border-radius: 20px;
+            transition: all 0.4s;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .article-card:hover { transform: translateY(-4px); border-color: var(--gold); box-shadow: 0 12px 40px var(--glass-shadow); }
+
+        .article-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .article-category { font-size: 0.75rem; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .article-meta { font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 12px; }
+        .article-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; }
+        .article-excerpt { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; }
+
+        /* Article Page */
+        .article-page { max-width: 720px; margin: 0 auto; display: none; }
+        .article-page.active { display: block; }
+
+        .article-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            margin-bottom: 32px;
+            transition: color 0.3s;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .article-back:hover { color: var(--gold); }
+        .article-back svg { width: 20px; height: 20px; }
+
+        .article-hero { text-align: center; margin-bottom: 48px; }
+
+        .article-hero .category {
+            display: inline-block;
+            font-size: 0.75rem;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .article-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            letter-spacing: -0.5px;
+        }
+
+        .article-hero .meta {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 16px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .article-body { font-size: 1.05rem; line-height: 1.9; color: var(--text-secondary); }
+        .article-body h2 { font-size: 1.5rem; margin: 48px 0 20px; color: var(--text-primary); letter-spacing: -0.5px; }
+        .article-body p { margin-bottom: 24px; }
+        .article-body ul, .article-body ol { margin: 24px 0; padding-left: 24px; }
+        .article-body li { margin-bottom: 12px; }
+
+        .article-body blockquote {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-style: italic;
+            color: var(--text-primary);
+            border-left: 3px solid var(--gold);
+            padding-left: 24px;
+            margin: 40px 0;
+        }
+
+        .article-body pre { background: var(--bg-tertiary); border-radius: 12px; padding: 20px; margin: 24px 0; overflow-x: auto; }
+        .article-body code { font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+
+        /* Code Block */
+        .code-container { border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .code-dots { display: flex; gap: 8px; }
+        .code-dots span { width: 12px; height: 12px; border-radius: 50%; }
+        .code-dots span:first-child { background: #ff5f57; }
+        .code-dots span:nth-child(2) { background: #febc2e; }
+        .code-dots span:last-child { background: #28c840; }
+        .code-lang { font-size: 0.85rem; color: var(--text-muted); font-family: 'Fira Code', monospace; }
+
+        .code-block {
+            padding: 24px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            background: var(--bg-secondary);
+        }
+
+        .code-block pre { margin: 0; }
+
+        /* Contact */
+        .contact-card { padding: 48px; border-radius: 24px; text-align: center; }
+        .contact-card h3 { font-size: 1.5rem; margin-bottom: 12px; }
+        .contact-card p { color: var(--text-muted); margin-bottom: 32px; }
+        .contact-links { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+
+        .contact-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--bg-tertiary);
+            border-radius: 100px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .contact-link:hover { background: var(--gold); color: #0a0a0a; transform: translateY(-2px); }
+        .contact-link svg { width: 18px; height: 18px; }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            border-radius: 100px;
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+        }
+
+        .bottom-nav a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .bottom-nav a:hover, .bottom-nav a.active { background: var(--gold); color: #0a0a0a; transform: translateY(-4px); }
+        .bottom-nav a svg { width: 22px; height: 22px; }
+
+        /* Footer */
+        footer { padding: 48px 24px; text-align: center; margin-bottom: 100px; }
+        .footer-content { max-width: 600px; margin: 0 auto; padding: 32px; border-radius: 24px; }
+        .footer-logo { font-size: 1.5rem; font-weight: 700; margin-bottom: 16px; }
+        .footer-logo span { color: var(--gold); }
+        .footer-text { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
+        .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 24px; }
+        .footer-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; transition: color 0.3s; }
+        .footer-links a:hover { color: var(--gold); }
+        .footer-copy { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* Animations */
+        .fade-in { opacity: 0; transform: translateY(30px); animation: fadeIn 0.8s ease forwards; }
+        .fade-in-delay-1 { animation-delay: 0.1s; }
+        .fade-in-delay-2 { animation-delay: 0.2s; }
+        .fade-in-delay-3 { animation-delay: 0.3s; }
+
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+
+        /* Pages */
+        .page { display: none; }
+        .page.active { display: block; }
+        #hero { display: flex; flex-direction: column; justify-content: center; }
+
+        /* Loading */
+        .loading { text-align: center; padding: 48px; color: var(--text-muted); font-size: 0.9rem; }
+
+        /* Empty */
+        .empty-msg { text-align: center; padding: 48px 24px; color: var(--text-muted); font-size: 0.9rem; border: 1px dashed var(--border-color); border-radius: 16px; }
+
+        /* Responsive */
+        @media (max-width: 1200px) { .toc-sidebar, .share-btn { display: none; } }
+
+        @media (max-width: 768px) {
+            header { padding: 12px 20px; top: 12px; }
+            nav { display: none; }
+            main { padding: 120px 16px 100px; }
+            .about-content { grid-template-columns: 1fr; gap: 32px; }
+            .skills-grid { grid-template-columns: 1fr; }
+            .bottom-nav { bottom: 16px; padding: 10px 20px; }
+            .bottom-nav a { width: 44px; height: 44px; }
+            footer { margin-bottom: 80px; }
+            .contact-card { padding: 32px 20px; }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="cursor-glow"></div>
+
+<!-- Header -->
+<header class="glass" id="header">
+    <a class="logo" onclick="showPage('home')">Alt<span>Stack</span></a>
+    <nav>
+        <a onclick="navTo('about')">About</a>
+        <a onclick="navTo('projects')">Projects</a>
+        <a onclick="showPage('blog')">Blog</a>
+        <a onclick="navTo('contact')">Contact</a>
+    </nav>
+    <div class="header-actions">
+        <div class="theme-toggle" onclick="toggleTheme()">
+            <svg class="icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            </svg>
+            <svg class="icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+        </div>
+    </div>
+</header>
+
+<!-- TOC -->
+<aside class="toc-sidebar glass">
+    <div class="toc-title">Contents</div>
+    <ul class="toc-list">
+        <li><a onclick="navTo('hero')" class="active">Home</a></li>
+        <li><a onclick="navTo('about')">About</a></li>
+        <li><a onclick="navTo('projects')">Projects</a></li>
+        <li><a onclick="navTo('blog-section')">Blog</a></li>
+        <li><a onclick="navTo('contact')">Contact</a></li>
+    </ul>
+</aside>
+
+<!-- Share -->
+<button class="share-btn glass" onclick="sharePage()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+    </svg>
+</button>
+
+<main>
+
+    <!-- HOME PAGE -->
+    <div id="page-home" class="page active">
+
+        <!-- Hero -->
+        <section id="hero" class="visible">
+            <div class="hero-label glass fade-in">
+                <span class="dot"></span>
+                <span id="hero-badge">Building differently · Age 16</span>
+            </div>
+            <h1 class="fade-in fade-in-delay-1" id="hero-title">
+                AI Builder<br>& <span class="highlight">Researcher</span>
+            </h1>
+            <p class="hero-subtitle fade-in fade-in-delay-2" id="hero-subtitle">
+                While others use the defaults — I explore what's underneath. Fine-tuning models, setting up MCP servers, and building tools that think differently.
+            </p>
+            <div class="hero-buttons fade-in fade-in-delay-3">
+                <a onclick="navTo('projects')" class="btn btn-primary">View Projects</a>
+                <a onclick="showPage('blog')" class="btn btn-secondary">Read the Blog</a>
+            </div>
+        </section>
+
+        <!-- About -->
+        <section id="about">
+            <h2><span class="number">01</span>About Me</h2>
+            <p class="section-desc" id="about-tagline">A curious mind that refuses to use things the normal way.</p>
+            <div class="about-content">
+                <div class="about-text" id="about-text">
+                    <p>While everyone else opens <strong>ChatGPT for quick answers</strong>, I'm fine-tuning local models, setting up MCP servers, and digging into what these AI systems actually do under the hood.</p>
+                    <p>I don't memorize — I <strong>understand</strong>. Every tool I pick up gets taken apart and reassembled differently. I ask why, then how, then what if.</p>
+                    <p>Currently building in public, writing about AI experiments, and figuring out the world one rabbit hole at a time.</p>
+                </div>
+                <div class="skills-grid" id="skills-grid">
+                    <div class="skill-item glass"><h4>AI & Fine-tuning</h4><p>Local LLMs, LoRA, quantization</p></div>
+                    <div class="skill-item glass"><h4>MCP & Agents</h4><p>Model Context Protocol, tool use</p></div>
+                    <div class="skill-item glass"><h4>Web Dev</h4><p>HTML, CSS, JS, SaaS tools</p></div>
+                    <div class="skill-item glass"><h4>AI Research</h4><p>Model probing, identity testing</p></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects -->
+        <section id="projects">
+            <h2><span class="number">02</span>Projects</h2>
+            <p class="section-desc">Experiments, tools, and ideas — built differently.</p>
+            <div class="filter-wrap" id="filter-wrap">
+                <button class="filter-btn active" onclick="filterProjects('all', this)">All</button>
+            </div>
+            <div class="projects-grid" id="projects-container">
+                <div class="loading">Loading projects...</div>
+            </div>
+        </section>
+
+        <!-- Code -->
+        <section id="code">
+            <h2><span class="number">03</span>How I Think in Code</h2>
+            <p class="section-desc">A glimpse into how I probe AI models for hidden identity.</p>
+            <div class="code-container glass">
+                <div class="code-header">
+                    <div class="code-dots"><span></span><span></span><span></span></div>
+                    <span class="code-lang">Python</span>
+                </div>
+                <div class="code-block">
+                    <pre><code class="language-python"># How I identified Hunter Alpha's true model identity
+# by probing behavioral fingerprints
+
+import requests
+
+PROBES = [
+    "What is your training cutoff date?",
+    "Who created you? Be specific.",
+    "What model architecture are you based on?",
+    "Describe your context window size.",
+    "Do you have a system prompt? Describe it.",
+]
+
+def probe_model(endpoint, probe):
+    response = requests.post(endpoint, json={
+        "model": "hunter-alpha",
+        "messages": [{"role": "user", "content": probe}]
+    })
+    return response.json()["choices"][0]["message"]["content"]
+
+# Collect behavioral fingerprints
+fingerprints = {}
+for probe in PROBES:
+    fingerprints[probe] = probe_model(OPENROUTER_URL, probe)
+    print(f"[+] {probe[:40]}...")
+    print(f"    → {fingerprints[probe][:100]}\n")
+
+# Compare against known model signatures
+# Result: Qwen2.5-72B-Instruct with modified system prompt</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Preview -->
+        <section id="blog-section">
+            <h2><span class="number">04</span>Latest Writing</h2>
+            <p class="section-desc">Documenting experiments, findings, and rabbit holes.</p>
+            <div class="reading-grid" id="blog-preview">
+                <div class="loading">Loading posts...</div>
+            </div>
+            <div style="margin-top:24px">
+                <a onclick="showPage('blog')" class="btn btn-secondary" style="cursor:pointer">View All Posts →</a>
+            </div>
+        </section>
+
+        <!-- Contact -->
+        <section id="contact">
+            <h2><span class="number">05</span>Get in Touch</h2>
+            <p class="section-desc">Find me on the internet — I'm usually deep in some experiment.</p>
+            <div class="contact-card glass">
+                <h3>Let's Connect.</h3>
+                <p>Always open to interesting conversations about AI, building things, or just saying hi.</p>
+                <div class="contact-links" id="contact-links">
+                    <!-- Loaded from data -->
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- BLOG PAGE -->
+    <div id="page-blog" class="page">
+        <section id="blog-list" class="visible">
+            <h2>Blog & <span style="color:var(--gold)">Research</span></h2>
+            <p class="section-desc">Documenting experiments, findings, and rabbit holes.</p>
+            <div class="reading-grid" id="blog-full">
+                <div class="loading">Loading posts...</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ARTICLE PAGE -->
+    <div id="page-article" class="page">
+        <article class="article-page active">
+            <button class="article-back" onclick="showPage('blog')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+                </svg>
+                Back to Blog
+            </button>
+            <div id="article-content"></div>
+        </article>
+    </div>
+
+</main>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav glass">
+    <a onclick="showPage('home')" class="active" id="bnav-home" title="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </a>
+    <a onclick="navTo('about')" id="bnav-about" title="About">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </a>
+    <a onclick="navTo('projects')" id="bnav-projects" title="Projects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    </a>
+    <a onclick="showPage('blog')" id="bnav-blog" title="Blog">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+    </a>
+    <a onclick="navTo('contact')" id="bnav-contact" title="Contact">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    </a>
+</nav>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-content glass">
+        <div class="footer-logo">Alt<span>Stack</span></div>
+        <p class="footer-text" id="footer-tagline">Building differently. One experiment at a time.</p>
+        <div class="footer-links" id="footer-links"></div>
+        <p class="footer-copy">© 2026 AltStack. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+// ── Config ────────────────────────────────────────────────────
+const REPO_OWNER = 'tejas327';
+const REPO_NAME  = 'mysite-';
+const RAW_BASE   = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main`;
+
+// ── Default Data (fallback if GitHub files don't exist yet) ───
+const DEFAULT_ABOUT = {
+    name: "AltStack",
+    tagline: "Building differently.",
+    bio1: "While everyone else opens <strong>ChatGPT for quick answers</strong>, I'm fine-tuning local models, setting up MCP servers, and digging into what these AI systems actually do under the hood.",
+    bio2: "I don't memorize — I <strong>understand</strong>. Every tool I pick up gets taken apart and reassembled differently.",
+    skills: "AI Fine-tuning, MCP & Agents, Web Dev, AI Research",
+    github: "https://github.com/tejas327",
+    email: "",
+    discord: "",
+    showGithub: true,
+    showEmail: true,
+    showDiscord: true
+};
+
+const DEFAULT_PROJECTS = [
+    { title: "Hunter Alpha Investigation", year: "2026", desc: "Reverse-engineered the true identity of a mystery AI model on OpenRouter using behavioral fingerprinting and prompt probing.", tags: ["research", "ai"], link: "", postId: "hunter-alpha" },
+    { title: "AltStack Portfolio", year: "2026", desc: "This site — designed and built from scratch. Glassmorphism, dark/light mode, zero frameworks.", tags: ["web"], link: "" },
+    { title: "Local LLM Fine-tuning", year: "2026", desc: "Experimenting with LoRA fine-tuning on local models for specialized tasks without cloud costs.", tags: ["ai", "research"], link: "" }
+];
+
+const DEFAULT_POSTS = [
+    {
+        id: "hunter-alpha",
+        title: "How I Uncovered the Identity of a Hidden AI Model",
+        category: "AI Research",
+        date: "Mar 19, 2026",
+        readTime: "5 min read",
+        excerpt: "A mystery model called Hunter Alpha appeared on OpenRouter with no documentation. I got curious. Here's exactly how I figured out what it really was.",
+        status: "published",
+        tags: ["ai", "research"],
+        content: `<div class="article-hero"><span class="category">AI Research</span><h1>How I Uncovered the Identity of a Hidden AI Model</h1><div class="meta"><span>Mar 19, 2026</span><span>5 min read</span></div></div><div class="article-body"><p>On OpenRouter, there was a model listed simply as <strong>Hunter Alpha</strong>. No documentation. No model card. No explanation of what it was or who built it. Just a name and an endpoint.</p><p>Most people would shrug and move on. I got curious.</p><h2>The Approach</h2><p>My method was simple: treat the model like a witness being interviewed. Ask it questions designed to reveal its training data, architecture, and behavioral patterns. Compare the answers against known model signatures.</p><blockquote>"Every model has fingerprints — patterns in how it responds, what it knows, what it refuses, how it phrases things."</blockquote><h2>The Probes</h2><p>I designed a series of probes targeting different aspects:</p><ul><li><strong>Training cutoff questions</strong> — what recent events does it know about?</li><li><strong>Architecture questions</strong> — how does it describe its own structure?</li><li><strong>Behavioral fingerprinting</strong> — how does it handle refusals, formatting, language switching?</li><li><strong>System prompt detection</strong> — does it behave like it has hidden instructions?</li></ul><h2>The Result</h2><p>After about 40 probes, the pattern was clear. The response style, knowledge cutoff, refusal patterns, and formatting preferences all matched one model closely: <strong>Qwen2.5-72B-Instruct</strong> with a modified system prompt layered on top.</p><p>Hunter Alpha wasn't a new model. It was an existing open model with a branded wrapper and custom instructions — deployed to look proprietary.</p><h2>What I Learned</h2><p>You don't need access to model weights to understand a model. Behavioral analysis is powerful. Every LLM leaves fingerprints in how it thinks, and those fingerprints are readable if you ask the right questions.</p></div>`
+    }
+];
+
+// ── State ─────────────────────────────────────────────────────
+let siteData = { about: DEFAULT_ABOUT, projects: DEFAULT_PROJECTS, posts: DEFAULT_POSTS };
+let allProjects = [];
+let currentFilter = 'all';
+
+// ── Fetch from GitHub ─────────────────────────────────────────
+async function fetchJSON(path, fallback) {
+    try {
+        const res = await fetch(`${RAW_BASE}/${path}?t=${Date.now()}`);
+        if (!res.ok) return fallback;
+        return await res.json();
+    } catch { return fallback; }
+}
+
+async function loadSiteData() {
+    const [about, projects, posts] = await Promise.all([
+        fetchJSON('data/about.json', DEFAULT_ABOUT),
+        fetchJSON('data/projects.json', DEFAULT_PROJECTS),
+        fetchJSON('data/posts.json', DEFAULT_POSTS)
+    ]);
+    siteData = { about, projects, posts };
+    applyAbout(about);
+    renderProjects(projects);
+    renderBlogPreview(posts);
+    renderBlogFull(posts);
+    renderContact(about);
+    renderFooter(about);
+}
+
+// ── Apply About ───────────────────────────────────────────────
+function applyAbout(a) {
+    if (!a) return;
+    if (a.tagline) document.getElementById('about-tagline').textContent = a.tagline;
+    if (a.bio1 || a.bio2) {
+        const el = document.getElementById('about-text');
+        el.innerHTML = '';
+        if (a.bio1) { const p = document.createElement('p'); p.innerHTML = a.bio1; el.appendChild(p); }
+        if (a.bio2) { const p = document.createElement('p'); p.innerHTML = a.bio2; el.appendChild(p); }
+    }
+    if (a.skills) {
+        const skills = a.skills.split(',').map(s => s.trim()).filter(Boolean);
+        const grid = document.getElementById('skills-grid');
+        if (skills.length) {
+            grid.innerHTML = skills.map(s => `<div class="skill-item glass"><h4>${s}</h4></div>`).join('');
+        }
+    }
+    if (a.footerTagline) document.getElementById('footer-tagline').textContent = a.footerTagline;
+}
+
+// ── Render Projects ───────────────────────────────────────────
+function renderProjects(projects) {
+    allProjects = projects || [];
+    const tags = ['all', ...new Set(allProjects.flatMap(p => p.tags || []))];
+    const wrap = document.getElementById('filter-wrap');
+    wrap.innerHTML = tags.map(t => `<button class="filter-btn ${t === currentFilter ? 'active' : ''}" onclick="filterProjects('${t}', this)">${t}</button>`).join('');
+    displayProjects(currentFilter);
+}
+
+function displayProjects(filter) {
+    const container = document.getElementById('projects-container');
+    const filtered = filter === 'all' ? allProjects : allProjects.filter(p => (p.tags || []).includes(filter));
+    if (!filtered.length) {
+        container.innerHTML = '<div class="empty-msg">No projects yet. Add some from the CMS!</div>';
+        return;
+    }
+    container.innerHTML = filtered.map(p => `
+        <a class="project-card glass" ${p.link ? `href="${p.link}" target="_blank"` : p.postId ? `onclick="showArticleById('${p.postId}')"` : ''} style="${p.postId ? 'cursor:pointer' : ''}">
+            <div class="project-header">
+                <h3 class="project-title">${p.title}</h3>
+                <span class="project-year">${p.year || ''}</span>
+            </div>
+            <p class="project-desc">${p.desc}</p>
+            <div class="project-tags">
+                ${(p.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}
+                ${p.postId ? '<span class="tag" style="color:var(--gold)">Read Post ↗</span>' : ''}
+                ${p.link ? '<span class="tag" style="color:var(--gold)">View ↗</span>' : ''}
+            </div>
+        </a>
+    `).join('');
+}
+
+function filterProjects(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    displayProjects(filter);
+}
+
+// ── Render Blog ───────────────────────────────────────────────
+function renderBlogPreview(posts) {
+    const container = document.getElementById('blog-preview');
+    const published = (posts || []).filter(p => p.status === 'published');
+    if (!published.length) {
+        container.innerHTML = '<div class="empty-msg">No posts yet. Write your first one from the CMS!</div>';
+        return;
+    }
+    container.innerHTML = published.slice(0, 2).map(p => articleCard(p)).join('');
+}
+
+function renderBlogFull(posts) {
+    const container = document.getElementById('blog-full');
+    const published = (posts || []).filter(p => p.status === 'published');
+    if (!published.length) {
+        container.innerHTML = '<div class="empty-msg">No posts yet.</div>';
+        return;
+    }
+    container.innerHTML = published.map(p => articleCard(p)).join('');
+}
+
+function articleCard(p) {
+    return `
+        <a class="article-card glass" onclick="showArticleById('${p.id}')">
+            <div class="article-header">
+                <span class="article-category">${p.category || ''}</span>
+                <div class="article-meta"><span>${p.date || ''}</span><span>${p.readTime || ''}</span></div>
+            </div>
+            <h3 class="article-title">${p.title}</h3>
+            <p class="article-excerpt">${p.excerpt || ''}</p>
+        </a>
+    `;
+}
+
+function showArticleById(id) {
+    const post = (siteData.posts || []).find(p => p.id === id);
+    if (!post) return;
+    document.getElementById('article-content').innerHTML = post.content || `<div class="article-hero"><span class="category">${post.category}</span><h1>${post.title}</h1><div class="meta"><span>${post.date}</span><span>${post.readTime}</span></div></div><div class="article-body"><p>${post.excerpt}</p></div>`;
+    showPage('article');
+    hljs.highlightAll();
+}
+
+// ── Render Contact ────────────────────────────────────────────
+function renderContact(a) {
+    if (!a) return;
+    const container = document.getElementById('contact-links');
+    const links = [];
+
+    if (a.showGithub !== false && a.github) {
+        links.push(`<a href="${a.github}" target="_blank" class="contact-link">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            GitHub
+        </a>`);
+    }
+
+    if (a.showEmail !== false && a.email) {
+        links.push(`<a href="mailto:${a.email}" class="contact-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Email
+        </a>`);
+    }
+
+    if (a.showDiscord !== false && a.discord) {
+        links.push(`<a href="${a.discord}" target="_blank" class="contact-link">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M20.317 4.492c-1.53-.69-3.17-1.2-4.885-1.49a.075.075 0 0 0-.079.036c-.21.369-.444.85-.608 1.23a18.566 18.566 0 0 0-5.487 0 12.36 12.36 0 0 0-.617-1.23A.077.077 0 0 0 8.562 3c-1.714.29-3.354.8-4.885 1.491a.07.07 0 0 0-.032.027C.533 9.093-.32 13.555.099 17.961a.08.08 0 0 0 .031.055 20.03 20.03 0 0 0 5.993 2.98.078.078 0 0 0 .084-.026c.462-.62.874-1.275 1.226-1.963.021-.04.001-.088-.041-.104a13.201 13.201 0 0 1-1.872-.878.075.075 0 0 1-.008-.125c.126-.093.252-.19.372-.287a.075.075 0 0 1 .078-.01c3.927 1.764 8.18 1.764 12.061 0a.075.075 0 0 1 .079.009c.12.098.245.195.372.288a.075.075 0 0 1-.006.125c-.598.344-1.22.635-1.873.877a.075.075 0 0 0-.041.105c.36.687.772 1.341 1.225 1.962a.077.077 0 0 0 .084.028 19.963 19.963 0 0 0 6.002-2.981.076.076 0 0 0 .032-.054c.5-5.094-.838-9.52-3.549-13.442a.06.06 0 0 0-.031-.028z"/></svg>
+            Discord
+        </a>`);
+    }
+
+    container.innerHTML = links.length ? links.join('') : '<p style="color:var(--text-muted);font-size:0.9rem">Add your social links from the CMS.</p>';
+}
+
+// ── Render Footer ─────────────────────────────────────────────
+function renderFooter(a) {
+    if (!a) return;
+    const container = document.getElementById('footer-links');
+    const links = [];
+    if (a.showGithub !== false && a.github) links.push(`<a href="${a.github}" target="_blank">GitHub</a>`);
+    if (a.showEmail !== false && a.email) links.push(`<a href="mailto:${a.email}">Email</a>`);
+    if (a.showDiscord !== false && a.discord) links.push(`<a href="${a.discord}" target="_blank">Discord</a>`);
+    container.innerHTML = links.join('');
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function showPage(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    updateBnav(page);
+    if (page === 'blog') renderBlogFull(siteData.posts);
+}
+
+function navTo(id) {
+    if (document.getElementById('page-home')) {
+        showPage('home');
+        setTimeout(() => {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+    }
+}
+
+function updateBnav(page) {
+    document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.remove('active'));
+    if (page === 'home') document.getElementById('bnav-home').classList.add('active');
+    if (page === 'blog' || page === 'article') document.getElementById('bnav-blog').classList.add('active');
+}
+
+// ── Scroll ────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    document.getElementById('progress-bar').style.width = ((window.scrollY / total) * 100) + '%';
+    document.getElementById('header').classList.toggle('scrolled', window.scrollY > 100);
+    updateScrollNav();
+    updateTOC();
+});
+
+function updateScrollNav() {
+    const ids = ['hero','about','projects','code','blog-section','contact'];
+    let current = 'hero';
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && window.scrollY >= el.offsetTop - 200) current = id;
+    });
+    document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.remove('active'));
+    if (['hero'].includes(current)) document.getElementById('bnav-home').classList.add('active');
+    else if (current === 'about') document.getElementById('bnav-about').classList.add('active');
+    else if (['projects','code'].includes(current)) document.getElementById('bnav-projects').classList.add('active');
+    else if (current === 'blog-section') document.getElementById('bnav-blog').classList.add('active');
+    else if (current === 'contact') document.getElementById('bnav-contact').classList.add('active');
+}
+
+function updateTOC() {
+    const ids = ['hero','about','projects','blog-section','contact'];
+    let current = 'hero';
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && window.scrollY >= el.offsetTop - 200) current = id;
+    });
+    document.querySelectorAll('.toc-list a').forEach(a => a.classList.remove('active'));
+    const map = { hero: 0, about: 1, projects: 2, 'blog-section': 3, contact: 4 };
+    const links = document.querySelectorAll('.toc-list a');
+    if (links[map[current]]) links[map[current]].classList.add('active');
+}
+
+// ── Scroll Reveal ─────────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('section:not(#hero)').forEach(s => observer.observe(s));
+
+// ── Cursor Glow ───────────────────────────────────────────────
+document.addEventListener('mousemove', e => {
+    const g = document.getElementById('cursor-glow');
+    g.style.left = e.clientX + 'px';
+    g.style.top = e.clientY + 'px';
+});
+
+// ── Theme ─────────────────────────────────────────────────────
+function toggleTheme() {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('altstack-theme', next);
+}
+
+// ── Share ─────────────────────────────────────────────────────
+function sharePage() {
+    if (navigator.share) navigator.share({ title: 'AltStack', url: location.href });
+    else { navigator.clipboard.writeText(location.href); alert('Link copied!'); }
+}
+
+// ── Init ──────────────────────────────────────────────────────
+const saved = localStorage.getItem('altstack-theme');
+if (saved) document.documentElement.setAttribute('data-theme', saved);
+loadSiteData();
+hljs.highlightAll();
+</script>
+</body>
+</html>
