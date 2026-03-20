@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "title": "MCP Control Panel",
+    "year": "2026",
+    "desc": "A visual dashboard for managing MCP servers and API keys in LibreChat. Built because editing config files manually is painful and one mistake breaks everything.",
+    "tags": [
+      "mcp",
+      "web",
+      "tools"
+    ],
+    "link": "",
+    "postId": ""
+  }
+]
