@@ -1,0 +1,15 @@
+[
+  {
+    "id": "hello",
+    "title": "hello",
+    "content": "the test file",
+    "htmlContent": "<div class=\"article-hero\"><span class=\"category\">web dev </span><h1>hello </h1><div class=\"meta\"><span>Mar 20, 2026</span><span>1 min read</span></div></div><div class=\"article-body\"><p>the test file</p></div>",
+    "category": "web dev",
+    "excerpt": "",
+    "status": "published",
+    "readTime": "1 min read",
+    "tags": [],
+    "date": "Mar 20, 2026",
+    "slug": "hello"
+  }
+]
