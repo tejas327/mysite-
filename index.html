@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -989,7 +990,40 @@ function articleCard(p) {
 function showArticleById(id) {
     const post = (siteData.posts || []).find(p => p.id === id);
     if (!post) return;
-    document.getElementById('article-content').innerHTML = post.content || `<div class="article-hero"><span class="category">${post.category}</span><h1>${post.title}</h1><div class="meta"><span>${post.date}</span><span>${post.readTime}</span></div></div><div class="article-body"><p>${post.excerpt}</p></div>`;
+
+    // Build article header
+    const header = `
+        <div class="article-hero">
+            <span class="category">${post.category || ''}</span>
+            <h1>${post.title}</h1>
+            <div class="meta">
+                <span>${post.date || ''}</span>
+                <span>${post.readTime || ''}</span>
+            </div>
+        </div>
+    `;
+
+    // Render content — if it looks like markdown use marked, else use as HTML
+    let body = '';
+    const rawContent = post.content || post.excerpt || '';
+    const isMarkdown = rawContent.includes('##') || rawContent.includes('**') || rawContent.includes('---');
+    if (isMarkdown && typeof marked !== 'undefined') {
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            highlight: function(code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    return hljs.highlight(code, { language: lang }).value;
+                }
+                return hljs.highlightAuto(code).value;
+            }
+        });
+        body = `<div class="article-body">${marked.parse(rawContent)}</div>`;
+    } else {
+        body = `<div class="article-body">${rawContent || '<p>' + post.excerpt + '</p>'}</div>`;
+    }
+
+    document.getElementById('article-content').innerHTML = header + body;
     showPage('article');
     hljs.highlightAll();
 }
