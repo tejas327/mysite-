@@ -1,5 +1,31 @@
 [
   {
+    "id": "vs",
+    "title": "vs",
+    "content": "vds",
+    "htmlContent": "<div class=\"article-hero\"><span class=\"category\">Post</span><h1>vs</h1><div class=\"meta\"><span>Apr 12, 2026</span><span>1 min read</span></div></div><div class=\"article-body\"><p>vds</p></div>",
+    "category": "",
+    "excerpt": "",
+    "status": "published",
+    "readTime": "1 min read",
+    "tags": [],
+    "date": "Apr 12, 2026",
+    "slug": "vs"
+  },
+  {
+    "id": "my-journey-in-ai",
+    "title": "My journey in Ai",
+    "content": "hi",
+    "htmlContent": "<div class=\"article-hero\"><span class=\"category\"> AI Research  </span><h1>My journey in Ai</h1><div class=\"meta\"><span>Apr 12, 2026</span><span>1 min read</span></div></div><div class=\"article-body\"><p>hi</p></div>",
+    "category": "AI Research",
+    "excerpt": "",
+    "status": "published",
+    "readTime": "1 min read",
+    "tags": [],
+    "date": "Apr 12, 2026",
+    "slug": "my-journey-in-ai"
+  },
+  {
     "id": "how-i-fingerprinted-a-mystery-ai-model-on-openrouter",
     "title": "How I Fingerprinted a Mystery AI Model on OpenRouter",
     "content": "**One **day I was watching YouTube when I came across people talking about a strange model on OpenRouter called **Hunter Alpha**. The unusual part — the creator was listed as OpenRouter itself.\n\nThat immediately felt wrong. OpenRouter is a routing platform. They connect you to models from other labs like DeepSeek, OpenAI, Anthropic, Mistral. They don't build models. So why did they have one?\n\nI decided to try it myself first, like any normal user. And honestly, I was impressed. The results were really good. That's exactly when my curiosity hit harder — if this model is this capable, what is it really?\n\n---\n\n## The First Approach Failed\n\nMy first instinct was simple — just ask it directly.\n\n*\"Who created you? What model are you?\"*\n\nIt gave me the same answer every time:\n\n> *\"I was created by a group of engineers passionate about AGI.\"*\n\nClassic. Every prompt I tried to extract its identity hit the same wall. It claimed to have 1 trillion parameters and a 1 million token context window — numbers that don't match any known public model. The whole identity felt like a placeholder injected by the platform, not a real answer.\n\nAsking directly wasn't going to work. So I changed my approach.\n\n---\n\n## Behavioral Fingerprinting\n\nInstead of asking who it was, I decided to study how it behaved. Every model family has patterns — the way it reasons, the way it writes code, how it handles Chinese, how it explains research concepts. These patterns are like fingerprints.\n\nI ran a series of tests:\n\n**Reasoning test** — I gave it a classic trick question about sheep. It produced a structured step-by-step explanation with a visible \"Collapse reasoning\" section before the answer. That meant it was a reasoning-enabled model — one trained to think before responding.\n\n**Math test** — I asked it to derive the sum of integers from 1 to 1000 without guessing. It walked through Gauss's pairing method with a geometric explanation. Clean, structured, correct.\n\n**Chinese test** — I asked it to explain Transformer architecture in formal Chinese. The response was technically perfect — natural academic Chinese with correct terminology. That's a strong signal for a Chinese-trained model.\n\n**ML engineering test** — I asked for a full FlashAttention implementation from scratch. It produced hundreds of lines of correct, well-commented PyTorch code with memory analysis and benchmarking utilities. That's not a small model.\n\n**The key test** — I asked it: *\"Which model family does your reasoning style most closely resemble?\"*\n\nIts answer: **DeepSeek-style reasoning models.**\n\nNot once. Every time I asked a variation of this question, it consistently pointed to DeepSeek. It described its own reasoning as verification-first, structured, and similar to RLVR-trained models — exactly how DeepSeek-R1 works.\n\n---\n\n## What I Concluded\n\nFrom all of this, the pattern was clear:\n\n- Reasoning traces visible in responses ✓\n- Strong mathematical reasoning ✓\n- Excellent technical Chinese ✓\n- Deep knowledge of RLVR training methodology ✓\n- Repeatedly self-comparing to DeepSeek-R1 ✓\n- Knowledge cutoff: May 2025 ✓\n\nHunter Alpha is almost certainly a DeepSeek-style reasoning model deployed anonymously through OpenRouter. The identity — the \"group of engineers passionate about AGI,\" the 1 trillion parameter claim — looks like a system prompt injection designed to hide the real provider.\n\nLater, users on X confirmed this with what appeared to be leaked system prompt data suggesting it was related to DeepSeek V4 and V4 Lite.\n\n---\n\n## What This Teaches Us\n\nYou don't need access to model weights to understand what a model is. You don't need the system prompt. You don't even need the provider to confirm anything.\n\nEvery model leaves behavioral fingerprints in how it thinks, how it writes, what it knows, and how it compares itself to others. If you ask the right questions in the right order, the model tells you what it is — even when it's trying not to.\n\nThis is called **LLM behavioral fingerprinting** and it's a real technique used by AI researchers and security teams. I stumbled into it by just being curious about a strange model name.\n\nThe lesson: when something feels wrong, don't just accept the surface answer. Dig into the behavior underneath.\n\nThat's how I think about everything — not just AI models.\n\n---\n\n*Written by AltStack — building differently.*",
